@@ -97,13 +97,22 @@ Open `eval/run_api_exskill.sh` and set the following variables:
 
 ```bash
 # ── Reasoning Model (the main agent) ──────────────────────────────────────
-export REASONING_MODEL_NAME=""
+# Ordinary MiniMax text defaults to Flash; set these explicitly for another
+# provider or an explicitly saved/custom/legacy model ID.
+export REASONING_MODEL_NAME="${REASONING_MODEL_NAME:-MiniMax-M3.1-Flash}"
 export REASONING_API_KEY=$API_KEY_1
-export REASONING_END_POINT=""       # OpenAI-compatible endpoint URL
+export REASONING_END_POINT="${REASONING_END_POINT:-https://api.minimax.io/v1/chat/completions}"
 
-# Optional: second API key for round-robin fallback
+# Optional: second API key/model for round-robin fallback. The fallback model
+# defaults to M3 and is used only when the second key and endpoint are set.
+export REASONING_MODEL_NAME_2="${REASONING_MODEL_NAME_2:-MiniMax-M3}"
 export REASONING_API_KEY_2=$API_KEY_2
-export REASONING_END_POINT_2=""
+export REASONING_END_POINT_2="${REASONING_END_POINT_2:-https://api.minimax.io/v1/chat/completions}"
+
+# Optional MiniMax reasoning controls. Flash uses reasoning_effort; M3 uses
+# thinking.type (adaptive or disabled). Unset values use provider defaults.
+# export REASONING_EFFORT="max"
+# export REASONING_THINKING="adaptive"
 
 # ── Verifier Model (LLM-as-judge for scoring) ─────────────────────────────
 export VERIFIER_MODEL_NAME=""

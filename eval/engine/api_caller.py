@@ -59,7 +59,8 @@ def _add_reasoning_param(payload: dict, model_name: str, end_point: str = None):
     model_lower = model_name.lower()
     is_gemini_model = "gemini" in model_lower
     is_gpt_model = "gpt-5" in model_lower or "o1" in model_lower or "o3" in model_lower
-    is_minimax_m3_model = "minimax-m3" in model_lower
+    is_minimax_flash_model = "minimax-m3.1-flash" in model_lower
+    is_minimax_m3_model = "minimax-m3" in model_lower and not is_minimax_flash_model
     
     # Check if it is OpenRouter API
     is_openrouter = False
@@ -87,6 +88,12 @@ def _add_reasoning_param(payload: dict, model_name: str, end_point: str = None):
         reasoning_effort = os.environ.get("REASONING_EFFORT")
         if reasoning_effort and reasoning_effort.lower() not in ["none", "false", ""]:
             payload["reasoning_effort"] = reasoning_effort  # "high", "medium", "low", "minimal"
+    elif is_minimax_flash_model:
+        # MiniMax-M3.1-Flash uses the OpenAI-compatible reasoning_effort field.
+        # "none" is not a valid Flash setting, so omit it rather than sending it.
+        reasoning_effort = os.environ.get("REASONING_EFFORT", "").lower()
+        if reasoning_effort and reasoning_effort not in {"none", "false"}:
+            payload["reasoning_effort"] = reasoning_effort
     elif is_minimax_m3_model:
         # MiniMax-M3 supports adaptive thinking via the "thinking" field.
         # Allowed values: "adaptive" (model decides whether to think) or "disabled".
@@ -393,6 +400,7 @@ def call_vision_api(model_name: str, messages: list, sampling_params: dict, max_
     # Get fallback API configuration (optional)
     api_key_2 = os.environ.get("REASONING_API_KEY_2")
     end_point_2 = os.environ.get("REASONING_END_POINT_2")
+    model_name_2 = os.environ.get("REASONING_MODEL_NAME_2") or model_name
     
     has_fallback = bool(api_key_2 and end_point_2)
     
@@ -412,7 +420,7 @@ def call_vision_api(model_name: str, messages: list, sampling_params: dict, max_
                 all_errors.append(f"Round {attempt + 1}: {error_1}")
             
             # Try fallback API in each Round-Robin
-            result_2, is_429_2, error_2 = _try_single_attempt(api_key_2, end_point_2, model_name, messages, 
+            result_2, is_429_2, error_2 = _try_single_attempt(api_key_2, end_point_2, model_name_2, messages,
                                                      sampling_params, api_name="Fallback API", tools=tools)
             if result_2 is not None:
                 return result_2
