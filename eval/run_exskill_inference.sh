@@ -8,20 +8,20 @@ API_KEY_2=""
 # Reasoning Model
 # ============================================================================
 
-# MiniMax is the ordinary text default; callers may override these exports for
-# another provider or an explicitly saved/custom/legacy model ID.
-export REASONING_MODEL_NAME="${REASONING_MODEL_NAME:-MiniMax-M3.1-Flash}"
+export REASONING_MODEL_NAME="${REASONING_MODEL_NAME:-}"
 
 export REASONING_API_KEY=$API_KEY_1
 # MiniMax OpenAI-compatible chat completion endpoint presets:
 #   global: https://api.minimax.io/v1/chat/completions
 #   China:  https://api.minimaxi.com/v1/chat/completions
-export REASONING_END_POINT="${REASONING_END_POINT:-https://api.minimax.io/v1/chat/completions}"
+# MiniMax-M3.1-Flash (default if model is unset), then MiniMax-M3 (explicit option).
+# Flash: optional REASONING_EFFORT=low|medium|high|xhigh|max (not none).
+# M3: optional REASONING_THINKING=adaptive|disabled.
+export REASONING_END_POINT="${REASONING_END_POINT:-}"
 
-# Optional: M3 fallback for round-robin polling. Leave API_KEY_2 empty to disable.
-export REASONING_MODEL_NAME_2="${REASONING_MODEL_NAME_2:-MiniMax-M3}"
+# Optional: Fallback API for round-robin polling, using the same explicit model.
 export REASONING_API_KEY_2=$API_KEY_2
-export REASONING_END_POINT_2="${REASONING_END_POINT_2:-https://api.minimax.io/v1/chat/completions}"
+export REASONING_END_POINT_2=""
 
 # ============================================================================
 # Verifier Model

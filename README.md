@@ -97,22 +97,13 @@ Open `eval/run_api_exskill.sh` and set the following variables:
 
 ```bash
 # ── Reasoning Model (the main agent) ──────────────────────────────────────
-# Ordinary MiniMax text defaults to Flash; set these explicitly for another
-# provider or an explicitly saved/custom/legacy model ID.
-export REASONING_MODEL_NAME="${REASONING_MODEL_NAME:-MiniMax-M3.1-Flash}"
+export REASONING_MODEL_NAME="${REASONING_MODEL_NAME:-}"
 export REASONING_API_KEY=$API_KEY_1
-export REASONING_END_POINT="${REASONING_END_POINT:-https://api.minimax.io/v1/chat/completions}"
+export REASONING_END_POINT="${REASONING_END_POINT:-}"  # OpenAI-compatible endpoint URL
 
-# Optional: second API key/model for round-robin fallback. The fallback model
-# defaults to M3 and is used only when the second key and endpoint are set.
-export REASONING_MODEL_NAME_2="${REASONING_MODEL_NAME_2:-MiniMax-M3}"
+# Optional: second API key for round-robin fallback using the same model
 export REASONING_API_KEY_2=$API_KEY_2
-export REASONING_END_POINT_2="${REASONING_END_POINT_2:-https://api.minimax.io/v1/chat/completions}"
-
-# Optional MiniMax reasoning controls. Flash uses reasoning_effort; M3 uses
-# thinking.type (adaptive or disabled). Unset values use provider defaults.
-# export REASONING_EFFORT="max"
-# export REASONING_THINKING="adaptive"
+export REASONING_END_POINT_2=""
 
 # ── Verifier Model (LLM-as-judge for scoring) ─────────────────────────────
 export VERIFIER_MODEL_NAME=""
@@ -135,6 +126,10 @@ export JINA_API_KEY=""              # Required for visit tool
 ```
 
 > All models must expose an **OpenAI-compatible chat completion API**. The embedding endpoint must support the `/v1/embeddings` interface.
+
+For ordinary MiniMax text, choose **MiniMax-M3.1-Flash** first, with **MiniMax-M3** as the second option. Set `REASONING_END_POINT` to `https://api.minimax.io/v1/chat/completions` (global) or `https://api.minimaxi.com/v1/chat/completions` (China). With either direct endpoint, an unset `REASONING_MODEL_NAME` defaults to Flash; an explicit model ID is always preserved. Other providers still require an explicit model. Existing fallback endpoints use the same selected model.
+
+Flash optionally accepts `REASONING_EFFORT=low|medium|high|xhigh|max`, serialized as `reasoning_effort`; `none` and unsupported values are omitted. M3 optionally accepts `REASONING_THINKING=adaptive|disabled`, serialized as `thinking.type`. Unset controls use provider defaults. These MiniMax fields apply only to the exact model on the direct endpoints above. Legacy/custom models, media payloads, embedding models, and saved trajectories are unchanged.
 
 ### 2. `eval/configs/tool_configs.yaml` — Per-Tool Runtime Settings
 
